@@ -2,7 +2,7 @@ import socket
 import threading #Threads allow us to separate code out so that it is not waiting for other code to finish before it is able to execute
 
 HEADER = 64
-PORT = 5055 #Course port is 5378
+PORT = 5050 #Course port is 5378
 SERVER = socket.gethostbyname(socket.gethostname()) #This automatically gets the IP address of every user/device. Course IP is 143.47.184.219
 ADDR = (SERVER, PORT) #The address is always a tuple
 FORMAT = "utf-8"
@@ -18,17 +18,28 @@ def handle_client(conn, addr):
     
     while connected:
 
-        msg = conn.recv(HEADER).decode(FORMAT) #The integer shows how many bytes we are willing to receive in every message. This is a message protocol. We then decode the message from byte format into string format using utf-8
+        data = ''
+        byte = ''
 
-        #data = ''
-        #byte = ''
-        #while byte != '\n': #Allows us to read byte-by-byte
-            #byte = conn.recv(HEADER).decode(FORMAT)
-            #data += byte
+        while byte != '\n': #Allows us to read byte-by-byte
+            byte = conn.recv(1).decode(FORMAT)
+            data += byte
 
-        print(f"The message is: {msg}")
+        if data == '':
+            break
 
+        print(f"{data}")
+        space_index = data.find(" ")
+        newline_index = data.find("\n")
 
+        if data[0:space_index] == "HELLO-FROM":
+            username = data[space_index + 1:newline_index]
+            print(f"Username is: {username}")
+            msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT) #For handshake, the message is sent in byte form, which is why decoding is required
+            #print(msg)
+            conn.send(msg)
+        #print(f"The username is: {username}")
+    
     conn.close() #We close the connection 
 
 def start():
