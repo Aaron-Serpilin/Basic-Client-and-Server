@@ -22,9 +22,13 @@ def handle_client(conn, addr):
         data = ''
         byte = ''
 
-        while byte != '\n': #Allows us to read byte-by-byte
-            byte = conn.recv(1).decode(FORMAT)
-            data += byte
+        try:
+            while byte != '\n': #Allows us to read byte-by-byte
+                byte = conn.recv(1).decode(FORMAT)
+                data += byte
+        except Exception in e:
+            print("There was an error with the user. The error is {e}")
+            conn.close()
 
         if data == '':
             break
