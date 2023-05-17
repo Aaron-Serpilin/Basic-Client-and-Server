@@ -7,6 +7,7 @@ SERVER = socket.gethostbyname(socket.gethostname()) #This automatically gets the
 ADDR = (SERVER, PORT) #The address is always a tuple
 FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "Disconnect"
+user_list = {}
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Here we make a socket that allows the device to open up to other sockets
 server.bind(ADDR) #Anything that connects to the given address will use the corresponding socket
@@ -28,17 +29,30 @@ def handle_client(conn, addr):
         if data == '':
             break
 
-        print(f"{data}")
+        #print(f"{data}")
+
         space_index = data.find(" ")
         newline_index = data.find("\n")
-
+    
         if data[0:space_index] == "HELLO-FROM":
             username = data[space_index + 1:newline_index]
             print(f"Username is: {username}")
             msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT) #For handshake, the message is sent in byte form, which is why decoding is required
             #print(msg)
             conn.send(msg)
-        #print(f"The username is: {username}")
+
+            if username in user_list:
+                msg = bytes(f"IN USE\n", FORMAT)
+                conn.send(msg)
+                break
+            else:
+                user_list[username] = conn #We add the username as well as the connection so we can relate the logged in users appropriately
+        elif data[0:space_index] == "LIST":
+            user_list_message = str()
+            for key in user_list:
+                user_list_message += key + ","
+            msg = bytes(f"LIST-OK {user_list_message}\n", FORMAT)
+            conn.send(msg)
     
     conn.close() #We close the connection 
 
