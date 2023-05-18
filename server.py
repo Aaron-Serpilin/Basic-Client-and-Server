@@ -2,7 +2,7 @@ import socket
 import threading
 
 HEADER = 64
-PORT = 5050
+PORT = 5051
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = "utf-8"
@@ -14,7 +14,9 @@ server.bind(ADDR)
 def handle_client(conn, addr):
 
     print(f"[New Connection] {addr} connected")
-    username = None
+
+    username = '' #Need to make it global within the function so that the receiving user can get the sender's username
+
     try:
 
         connected = True
@@ -23,7 +25,6 @@ def handle_client(conn, addr):
 
             data = ''
             byte = ''
-            username = ''
 
             # while True:
             #     byte = conn.recv(1).decode(FORMAT)
@@ -46,8 +47,7 @@ def handle_client(conn, addr):
             newline_index = data.find("\n")
 
             if data[0:space_index] == "HELLO-FROM":
-                username = data[space_index + 1:newline_index]
-                logged_user = username
+                username = data[space_index + 1:newline_index-1]
                 print(f"Username is: {username}")
                 msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
                 conn.send(msg)
@@ -64,6 +64,16 @@ def handle_client(conn, addr):
                     user_list_message += key + ","
                 msg = bytes(f"LIST-OK {user_list_message}\n", FORMAT)
                 conn.send(msg)
+            elif data[0:space_index] == "SEND":
+                split_data = data[data.find(" ") + 1:]
+                receiving_user = split_data[0:split_data.find(" ")]
+                receiving_message = split_data[split_data.find(" ") + 1:]
+                receiving_user_conn = user_list[receiving_user]
+                #print(f"The user is {receiving_user} and the message for him is {receiving_message}")
+                #print(f"The conn is {receiving_user_conn}")
+                msg = bytes(f"DELIVERY {username} {receiving_message}\n", FORMAT)
+                receiving_user_conn.send(msg)
+
     
     except Exception as e:  
             print(f"There was an error with the user. The error is {e}")
