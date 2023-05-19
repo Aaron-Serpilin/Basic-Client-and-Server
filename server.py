@@ -41,49 +41,61 @@ def handle_client(conn, addr):
                 data += byte
 
             if not data:
-                raise Exception('client bye bye')
+                raise Exception('Client Disconnected')
 
             space_index = data.find(" ")
             newline_index = data.find("\n")
 
             if data[0:space_index] == "HELLO-FROM":
+
                 username = data[space_index + 1:newline_index-1]
                 print(f"Username is: {username}")
                 msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
                 conn.send(msg)
 
-                if username in user_list:
+                if username in user_list: #Throws an exception
                     msg = bytes(f"IN USE\n", FORMAT)
                     conn.send(msg)
                     break
                 else:
                     user_list[username] = conn
+
             elif data[0:space_index] == "LIST":
+
                 user_list_message = str()
                 for key in user_list:
                     user_list_message += key + ","
                 msg = bytes(f"LIST-OK {user_list_message}\n", FORMAT)
                 conn.send(msg)
+                
             elif data[0:space_index] == "SEND":
+
                 split_data = data[data.find(" ") + 1:]
                 receiving_user = split_data[0:split_data.find(" ")]
                 receiving_message = split_data[split_data.find(" ") + 1:]
                 receiving_user_conn = user_list[receiving_user]
-                #print(f"The user is {receiving_user} and the message for him is {receiving_message}")
-                #print(f"The conn is {receiving_user_conn}")
-                msg = bytes(f"DELIVERY {username} {receiving_message}\n", FORMAT)
-                receiving_user_conn.send(msg)
+        
+                if receiving_user in user_list: #Throws an exception
 
-    
+                    msg = bytes(f"DELIVERY {username} {receiving_message}\n", FORMAT)
+                    receiving_user_conn.send(msg)
+                    conn.send(bytes(f"SEND-OK\n", FORMAT))
+
+                else: 
+
+                    msg = bytes(f"BAD-DEST-USER\n", FORMAT)
+                    conn.send(msg)
+
     except Exception as e:  
+
             print(f"There was an error with the user. The error is {e}")
 
     finally:
+
         if username and username in user_list:
             del user_list[username]
             print(f"This user has been deleted: {username}")
-            
-
+        
     conn.close()
 
 
