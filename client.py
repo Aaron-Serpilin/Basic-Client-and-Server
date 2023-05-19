@@ -2,7 +2,7 @@ import socket
 import threading
 
 HEADER = 64
-PORT = 5051 #5378 is the VU port
+PORT = 5050 #5378 is the VU port
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "Disconnect"
 SERVER = socket.gethostbyname(socket.gethostname()) # This binds the local client and server. If we just placed the IP to the right, it would connect to the VU server "143.47.184.219"

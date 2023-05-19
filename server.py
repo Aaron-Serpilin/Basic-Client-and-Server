@@ -2,7 +2,7 @@ import socket
 import threading
 
 HEADER = 64
-PORT = 5051
+PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = "utf-8"
@@ -67,22 +67,19 @@ def handle_client(conn, addr):
                     user_list_message += key + ","
                 msg = bytes(f"LIST-OK {user_list_message}\n", FORMAT)
                 conn.send(msg)
-                
+
             elif data[0:space_index] == "SEND":
 
                 split_data = data[data.find(" ") + 1:]
                 receiving_user = split_data[0:split_data.find(" ")]
                 receiving_message = split_data[split_data.find(" ") + 1:]
-                receiving_user_conn = user_list[receiving_user]
-        
-                if receiving_user in user_list: #Throws an exception
 
+                if receiving_user in user_list:
+                    receiving_user_conn = user_list[receiving_user]
                     msg = bytes(f"DELIVERY {username} {receiving_message}\n", FORMAT)
                     receiving_user_conn.send(msg)
                     conn.send(bytes(f"SEND-OK\n", FORMAT))
-
                 else: 
-
                     msg = bytes(f"BAD-DEST-USER\n", FORMAT)
                     conn.send(msg)
 
