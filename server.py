@@ -49,22 +49,29 @@ def handle_client(conn, addr):
             if data[0:space_index] == "HELLO-FROM":
 
                 username = data[space_index + 1:newline_index-1]
-                print(f"Username is: {username}")
-                msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
-                conn.send(msg)
-
                 if username in user_list: #Throws an exception
-                    msg = bytes(f"IN USE\n", FORMAT)
+                    print("JA TA CA O FDP")
+                    msg = bytes(f"IN-USE\n", FORMAT)
                     conn.send(msg)
                     break
                 else:
                     user_list[username] = conn
+                print(f"Username is: {username}")
+                msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
+                conn.send(msg)
+
+                
 
             elif data[0:space_index] == "LIST":
 
                 user_list_message = str()
+                counter = 0
                 for key in user_list:
-                    user_list_message += key + ","
+                    counter += 1
+                    if counter == len(user_list):
+                        user_list_message += key
+                    else:
+                        user_list_message += key + ","
                 msg = bytes(f"LIST-OK {user_list_message}\n", FORMAT)
                 conn.send(msg)
 
