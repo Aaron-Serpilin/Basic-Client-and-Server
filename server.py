@@ -50,7 +50,6 @@ def handle_client(conn, addr):
 
                 username = data[space_index + 1:newline_index-1]
                 if username in user_list: #Throws an exception
-                    print("JA TA CA O FDP")
                     msg = bytes(f"IN-USE\n", FORMAT)
                     conn.send(msg)
                     break
@@ -97,7 +96,7 @@ def handle_client(conn, addr):
     finally:
 
         if username and username in user_list:
-            del user_list[username]
+            #del user_list[username]
             print(f"This user has been deleted: {username}")
         
     conn.close()
