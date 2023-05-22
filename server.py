@@ -11,6 +11,11 @@ user_list = {}
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
+def cleanup(username):
+        if username and username in user_list:
+            del user_list[username]
+            print(f"This user has been deleted: {username}")
+
 def handle_client(conn, addr):
 
     print(f"[New Connection] {addr} connected")
@@ -49,11 +54,13 @@ def handle_client(conn, addr):
             if data[0:space_index] == "HELLO-FROM":
 
                 username = data[space_index + 1:newline_index-1]
-                if username in user_list: #Throws an exception
+                if username in user_list: #Check to see if username is already used             
                     msg = bytes(f"IN-USE\n", FORMAT)
+                    print("CUANDO DA MERDA",user_list)
                     conn.send(msg)
                     break
                 else:
+                    print("CUANDO DA BOM",user_list)
                     user_list[username] = conn
                 print(f"Username is: {username}")
                 msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
@@ -89,17 +96,14 @@ def handle_client(conn, addr):
                     msg = bytes(f"BAD-DEST-USER\n", FORMAT)
                     conn.send(msg)
 
-    except Exception as e:  
-
+    except Exception as e:
             print(f"There was an error with the user. The error is {e}")
+            cleanup(username)  # Call cleanup when an exception occurs
 
-    finally:
-
-        if username and username in user_list:
-            #del user_list[username]
-            print(f"This user has been deleted: {username}")
-        
     conn.close()
+
+    
+
 
 
 def start():
