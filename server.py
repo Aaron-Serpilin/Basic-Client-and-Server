@@ -30,17 +30,7 @@ def handle_client(conn, addr):
 
             data = ''
             byte = ''
-
-            # while True:
-            #     byte = conn.recv(1).decode(FORMAT)
-            #     if not data:
-            #         raise Exception('User has thrown exception')
-                    
-            #     if data == '\n':
-            #         break
-            #     else:
-            #         byte += data
-                
+            
             while byte != '\n':
                 byte = conn.recv(1).decode(FORMAT)
                 data += byte
@@ -53,18 +43,21 @@ def handle_client(conn, addr):
 
             if data[0:space_index] == "HELLO-FROM":
 
+                if len(user_list) == 64:                    # If server has 64 clients don't allow any more to join
+                    msg = bytes(f"BUSY\n", FORMAT)
+                    conn.send(msg)
+                    break
+
                 username = data[space_index + 1:newline_index-1]
-                if username in user_list: #Check to see if username is already used             
+                if username in user_list:                   #Check to see if username is already used             
                     msg = bytes(f"IN-USE\n", FORMAT)
-                    print("CUANDO DA MERDA",user_list)
                     conn.send(msg)
                     break
                 else:
-                    print("CUANDO DA BOM",user_list)
                     user_list[username] = conn
-                print(f"Username is: {username}")
-                msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
-                conn.send(msg)
+                    print(f"Username is: {username}")
+                    msg = bytes(f"HELLO {data[space_index:]}\n", FORMAT)
+                    conn.send(msg)
 
                 
 
@@ -101,9 +94,6 @@ def handle_client(conn, addr):
             cleanup(username)  # Call cleanup when an exception occurs
 
     conn.close()
-
-    
-
 
 
 def start():
