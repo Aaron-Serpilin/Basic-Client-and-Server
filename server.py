@@ -49,6 +49,12 @@ def handle_client(conn, addr):
                     break
 
                 username = data[space_index + 1:newline_index-1]
+
+                if username.isalpha() == False:             # Check if username is valid
+                    msg = bytes(f"BAD-RQST-BODY\n",FORMAT)
+                    conn.send(msg)
+                    break
+
                 if username in user_list:                   #Check to see if username is already used             
                     msg = bytes(f"IN-USE\n", FORMAT)
                     conn.send(msg)
